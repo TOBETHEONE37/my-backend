@@ -4,6 +4,8 @@ from gtts import gTTS
 import os
 import uuid
 
+from Preset.PresetHandler import PresetHandler
+
 app = FastAPI()
 
 # CORS 설정 (필수)
@@ -35,8 +37,9 @@ async def text_to_speech(data: dict):
 
     # 음성 파일 URL 반환 (Railway가 정적 파일 지원을 하지 않으므로 실제 서비스는 클라우드 저장소를 사용해야 함)
     audio_url = f"/audio/{filename}"
-
-    return {"audio_url": audio_url}
+    instance = PresetHandler()
+    preset = instance.addPreset(text, audio_url)
+    return preset
 
 # 생성된 오디오 파일 제공 엔드포인트
 from fastapi.responses import FileResponse
@@ -51,3 +54,9 @@ async def get_audio(filename: str):
 @app.get("/emergency/")
 async def get_emergency():
     return {"message": "Success"}
+
+
+@app.get("/preset/")
+async def get_preset_list():
+    instance = PresetHandler()
+    return instance.presetList
