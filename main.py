@@ -48,6 +48,6 @@ async def get_audio(filename: str):
         raise HTTPException(status_code=404, detail="파일을 찾을 수 없습니다.")
     return FileResponse(filepath, media_type="audio/mpeg")
 
-@app.get("/emergency")
+@app.get("/emergency/")
 async def get_emergency():
-    return 0
+    return {"message": "Success"}
