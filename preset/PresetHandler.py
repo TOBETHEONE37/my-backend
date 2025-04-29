@@ -4,6 +4,9 @@ class Preset:
         self.text = text                       # TTS Text
         self.audioUrl = audioUrl               # TTS URL(TTS 파일 경로)
 
+    def __repr__(self):
+        return f"Preset(id={self.id}, text={self.text}, audioUrl={self.audioUrl})"
+
 
 class PresetHandler:
     _instance = None

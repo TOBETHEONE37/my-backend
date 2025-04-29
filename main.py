@@ -3,8 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from gtts import gTTS
 import os
 import uuid
+import logging
 
-from Preset.PresetHandler import PresetHandler
+from preset.PresetHandler import PresetHandler
 
 app = FastAPI()
 
@@ -20,6 +21,11 @@ app.add_middleware(
 # 음성 파일 저장 위치
 AUDIO_DIR = "audios"
 os.makedirs(AUDIO_DIR, exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 @app.post("/tts/")
 async def text_to_speech(data: dict):
@@ -85,3 +91,29 @@ async def delete_preset(id: int = Query(...)):
         raise HTTPException(status_code=500, detail=f"파일 삭제 중 오류 발생: {str(e)}")
 
     return res
+
+# 방송
+@app.post("/broadcasts/")
+async def broadcasts(data: dict):
+    # 방송할 특정 지역 및 구역들 Id
+    zone_ids = data.get("zoneIds")
+    # 방송에 담을 preset
+    preset = data.get("preset")
+
+    # 조건 1: zone_ids가 없다면 전체 방송
+    # 조건 2: preset이 없다면 마이크 방송
+    logging.info(zone_ids)
+    logging.info(preset)
+
+    return {"message": "Broadcasts start"}
+
+# 방송 취소
+@app.post("/broadcasts/stop/")
+async def broadcasts(data: dict):
+    # 방송할 특정 지역 및 구역들 Id
+    zone_ids = data.get("zoneIds")
+
+    # 조건 1: zone_ids가 없다면 전체 방송 종료?
+    logging.info(zone_ids)
+
+    return {"message": "Broadcasts start"}
