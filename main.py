@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from gtts import gTTS
 import os
@@ -60,3 +60,28 @@ async def get_emergency():
 async def get_preset_list():
     instance = PresetHandler()
     return instance.presetList
+
+@app.delete("/preset/")
+async def delete_preset(id: int = Query(...)):
+    instance = PresetHandler()
+    preset = instance.removePreset(id)
+
+    res = {"message": "Preset Delete Success"}
+
+    if preset is None:
+        raise HTTPException(status_code=404, detail=f"Preset Not Found")
+
+    # audio_url에서 파일명만 추출
+    filename = os.path.basename(preset.audioUrl)
+    filepath = os.path.join(AUDIO_DIR, filename)
+
+    # 파일 존재 여부 확인 및 삭제
+    if not os.path.exists(filepath):
+        return res
+
+    try:
+        os.remove(filepath)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"파일 삭제 중 오류 발생: {str(e)}")
+
+    return res

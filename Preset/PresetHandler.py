@@ -7,6 +7,7 @@ class Preset:
 
 class PresetHandler:
     _instance = None
+    sequence = 0
     presetList = []
 
     def __new__(cls):
@@ -15,7 +16,28 @@ class PresetHandler:
         return cls._instance
 
     def addPreset(self, text, audioUrl):
-        id = len(self.presetList)
+        id = self.sequence
+        self.sequence += 1
         preset = Preset(id, text, audioUrl)
-        self.presetList.append(preset)
+        self.solution(self.add, preset)
         return preset
+
+    def removePreset(self, id):
+        target = self.search(id)
+        if target is None:
+            return None
+        self.solution(self.remove, target)
+        return target
+
+    def search(self, id):
+        return next((preset for preset in self.presetList if preset.id == id), None)
+
+    def add(self, preset):
+        self.presetList.append(preset)
+
+    def remove(self, preset):
+        self.presetList.remove(preset)
+
+    def solution(self, func, preset):
+        # 동시성 이슈 발생시 작업
+        func(preset)
