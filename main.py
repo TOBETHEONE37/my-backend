@@ -116,4 +116,4 @@ async def broadcasts(data: dict):
     # 조건 1: zone_ids가 없다면 전체 방송 종료?
     logging.info(zone_ids)
 
-    return {"message": "Broadcasts start"}
+    return {"message": "Broadcasts stop"}
