@@ -5,7 +5,8 @@ import os
 import uuid
 import logging
 
-from preset.PresetHandler import PresetHandler
+from manager.PresetManager import PresetManager
+from manager.VoicePlaybackManager import VoicePlaybackManager
 
 app = FastAPI()
 
@@ -43,8 +44,8 @@ async def text_to_speech(data: dict):
 
     # 음성 파일 URL 반환 (Railway가 정적 파일 지원을 하지 않으므로 실제 서비스는 클라우드 저장소를 사용해야 함)
     audio_url = f"/audio/{filename}"
-    instance = PresetHandler()
-    preset = instance.addPreset(text, audio_url)
+    preset_manager = PresetManager()
+    preset = preset_manager.addPreset(text, audio_url, filepath)
     return preset
 
 # 생성된 오디오 파일 제공 엔드포인트
@@ -59,18 +60,21 @@ async def get_audio(filename: str):
 
 @app.get("/emergency/")
 async def get_emergency():
+    voice_playback_manager = VoicePlaybackManager()
+    voice_playback_manager.stop_current_sound()
+    voice_playback_manager.play_new_sound("./audios/emergency.mp3")
     return {"message": "Success"}
 
 
 @app.get("/preset/")
 async def get_preset_list():
-    instance = PresetHandler()
-    return instance.presetList
+    preset_manager = PresetManager()
+    return preset_manager.presetList
 
 @app.delete("/preset/")
 async def delete_preset(id: int = Query(...)):
-    instance = PresetHandler()
-    preset = instance.removePreset(id)
+    preset_manager = PresetManager()
+    preset = preset_manager.removePreset(id)
 
     res = {"message": "Preset Delete Success"}
 
@@ -99,9 +103,11 @@ async def broadcasts(data: dict):
     zone_ids = data.get("zoneIds")
     # 방송에 담을 preset
     preset = data.get("preset")
-
+    logging.info(preset)
     # 조건 1: zone_ids가 없다면 전체 방송
     # 조건 2: preset이 없다면 마이크 방송
+    voice_playback_manager = VoicePlaybackManager()
+    voice_playback_manager.play_new_sound(preset.get("filePath"))
     logging.info(zone_ids)
     logging.info(preset)
 
@@ -113,6 +119,8 @@ async def broadcasts(data: dict):
     # 방송할 특정 지역 및 구역들 Id
     zone_ids = data.get("zoneIds")
 
+    voice_playback_manager = VoicePlaybackManager()
+    voice_playback_manager.stop_current_sound()
     # 조건 1: zone_ids가 없다면 전체 방송 종료?
     logging.info(zone_ids)
 

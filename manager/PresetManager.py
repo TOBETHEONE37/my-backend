@@ -1,27 +1,28 @@
 class Preset:
-    def __init__(self, id, text, audioUrl):
+    def __init__(self, id, text, audioUrl, filePath):
         self.id = id                           # List Index
         self.text = text                       # TTS Text
         self.audioUrl = audioUrl               # TTS URL(TTS 파일 경로)
+        self.filePath = filePath
 
     def __repr__(self):
-        return f"Preset(id={self.id}, text={self.text}, audioUrl={self.audioUrl})"
+        return f"Preset(id={self.id}, text={self.text}, audio_url={self.audioUrl}, file_path={self.filePath})"
 
 
-class PresetHandler:
+class PresetManager:
     _instance = None
     sequence = 0
     presetList = []
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(PresetHandler, cls).__new__(cls)
+            cls._instance = super(PresetManager, cls).__new__(cls)
         return cls._instance
 
-    def addPreset(self, text, audioUrl):
+    def addPreset(self, text, audio_url, file_path):
         id = self.sequence
         self.sequence += 1
-        preset = Preset(id, text, audioUrl)
+        preset = Preset(id, text, audio_url, file_path)
         self.solution(self.add, preset)
         return preset
 
