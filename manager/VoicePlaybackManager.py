@@ -81,4 +81,8 @@ class VoicePlaybackManager:
                 logging.info("No active playback to stop.")
                 return False
 
+    def playback_health_check(self):
+        if self.current_playback and self.current_playback.active:
+            return True
+        return False
 

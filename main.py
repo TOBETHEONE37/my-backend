@@ -125,3 +125,10 @@ async def broadcasts(data: dict):
     logging.info(zone_ids)
 
     return {"message": "Broadcasts stop"}
+
+
+# 방송
+@app.get("/broadcasts/health-check")
+async def broadcasts_health_check():
+    voice_playback_manager = VoicePlaybackManager()
+    return voice_playback_manager.playback_health_check()
