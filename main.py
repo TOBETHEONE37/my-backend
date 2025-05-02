@@ -5,8 +5,10 @@ import os
 import uuid
 import logging
 
+from pydantic import BaseModel
+
 from manager.PresetManager import PresetManager
-from manager.VoicePlaybackManager import VoicePlaybackManager
+from manager.PyGameManager import BgmPlayer
 
 app = FastAPI()
 
@@ -60,9 +62,9 @@ async def get_audio(filename: str):
 
 @app.get("/emergency/")
 async def get_emergency():
-    voice_playback_manager = VoicePlaybackManager()
-    voice_playback_manager.stop_current_sound()
-    voice_playback_manager.play_new_sound("./audios/emergency.mp3")
+    voice_playback_manager = BgmPlayer()
+    voice_playback_manager.stop()
+    voice_playback_manager.play_new_sound("./audios/fire_alert.mp3")
     return {"message": "Success"}
 
 
@@ -106,21 +108,26 @@ async def broadcasts(data: dict):
     logging.info(preset)
     # 조건 1: zone_ids가 없다면 전체 방송
     # 조건 2: preset이 없다면 마이크 방송
-    voice_playback_manager = VoicePlaybackManager()
-    voice_playback_manager.play_new_sound(preset.get("filePath"))
+    bgm_player_manager = BgmPlayer()
+    bgm_player_manager.play_new_sound(preset.get("filePath"))
     logging.info(zone_ids)
     logging.info(preset)
 
     return {"message": "Broadcasts start"}
 
+
+# test 를 위해서 dict 대신 pydantic으로 바꿈
+class BroadcastsStopRequest(BaseModel):
+    zoneIds: list[int] | None = None
+
 # 방송 취소
 @app.post("/broadcasts/stop/")
-async def broadcasts(data: dict):
+async def broadcasts(data: BroadcastsStopRequest):
     # 방송할 특정 지역 및 구역들 Id
-    zone_ids = data.get("zoneIds")
+    zone_ids = data.zoneIds
 
-    voice_playback_manager = VoicePlaybackManager()
-    voice_playback_manager.stop_current_sound()
+    bgm_player_manager = BgmPlayer()
+    bgm_player_manager.stop()
     # 조건 1: zone_ids가 없다면 전체 방송 종료?
     logging.info(zone_ids)
 
@@ -130,5 +137,5 @@ async def broadcasts(data: dict):
 # 방송
 @app.get("/broadcasts/health-check")
 async def broadcasts_health_check():
-    voice_playback_manager = VoicePlaybackManager()
-    return voice_playback_manager.playback_health_check()
+    bgm_player_manager = BgmPlayer()
+    return bgm_player_manager.health_check()
