@@ -8,7 +8,11 @@ import logging
 from manager.PresetManager import PresetManager
 from manager.VoicePlaybackManager import VoicePlaybackManager
 
-app = FastAPI()
+app = FastAPI(
+    title="TTS-Back",
+    description="TTS (Text-to-Speech) Backend Service - FastAPI 기반 음성 변환 서비스",
+    version="1.0.0"
+)
 
 # CORS 설정 (필수)
 app.add_middleware(
